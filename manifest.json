@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Convert Shorts Into Videos",
+  "version": "1.0.0",
+  "description": "Convert /shorts/ into /watch?v= on YouTube.",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "64": "icon.png",
+    "128": "icon.png",
+    "256": "icon.png"
+  },
+  "host_permissions": [
+    "https://www.youtube.com/shorts/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/shorts/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "browser_specific_settings": {
+        "gecko": {
+            "id": "{dde4f5cd-a87e-42f1-bda3-f53d61c82b3f}",
+            "strict_min_version": "109.0"
+        }
+  }
+}

@@ -4,7 +4,7 @@
   "version": "1.0.2",
   "author": "Nhân Trí",
   "homepage_url": "https://github.com/nhantrichuyenanh/YouTube-Convert-Shorts-Into-Videos",
-  "description": "Convert /shorts/ into /watch?v= on YouTube.",
+  "description": "Converts /shorts/ into /watch?v= on YouTube.",
   "icons": {
     "16": "icon.png",
     "32": "icon.png",
@@ -31,4 +31,5 @@
             "strict_min_version": "109.0"
         }
   }
+
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Convert Shorts Into Videos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Convert /shorts/ into /watch?v= on YouTube.",
   "icons": {
     "16": "icon.png",

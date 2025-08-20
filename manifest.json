@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Convert Shorts Into Videos",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Nhân Trí",
   "homepage_url": "https://github.com/nhantrichuyenanh/YouTube-Convert-Shorts-Into-Videos",
   "description": "Converts /shorts/ into /watch?v= on YouTube.",

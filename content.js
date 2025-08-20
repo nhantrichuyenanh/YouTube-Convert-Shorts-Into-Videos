@@ -61,9 +61,9 @@
                 e.stopPropagation();
                 e.stopImmediatePropagation();
                 if (e.ctrlKey || e.metaKey || e.shiftKey) {
-                    window.open(convertedHref, '_blank');
+                    window.open(convertedHref, '_blank', 'noopener,noreferrer');
                 } else {
-                    window.location.href = convertedHref;
+                    window.open(convertedHref, "_self");
                 }
                 return false;
             }, true);
@@ -90,26 +90,41 @@
         interceptYouTubeNavigation();
         processLinks();
 
-        const observer = new MutationObserver(function(mutations) {
-            let shouldProcess = false;
+        // Debounce function to reduce excessive processing
+        let processingTimeout;
+        function debouncedProcessLinks() {
+            clearTimeout(processingTimeout);
+            processingTimeout = setTimeout(processLinks, 100);
+        }
 
-            mutations.forEach(function(mutation) {
+        // More targeted observer with reduced scope
+        const observer = new MutationObserver(function(mutations) {
+            let hasRelevantChanges = false;
+
+            // Process mutations more efficiently
+            for (const mutation of mutations) {
+                // Skip irrelevant mutations early
+                if (mutation.type === 'attributes' && mutation.attributeName !== 'href') {
+                    continue;
+                }
+
                 if (mutation.addedNodes.length > 0) {
-                    mutation.addedNodes.forEach(function(node) {
+                    for (const node of mutation.addedNodes) {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            if (node.querySelector && node.querySelector('a[href*="/shorts/"]')) {
-                                shouldProcess = true;
-                            }
-                            if (node.tagName === 'A' && node.href && node.href.includes('/shorts/')) {
-                                shouldProcess = true;
+                            // Quick check for shorts links without deep traversal
+                            if ((node.tagName === 'A' && node.href && node.href.includes('/shorts/')) ||
+                                (node.innerHTML && node.innerHTML.includes('/shorts/'))) {
+                                hasRelevantChanges = true;
+                                break;
                             }
                         }
-                    });
+                    }
+                    if (hasRelevantChanges) break;
                 }
-            });
+            }
 
-            if (shouldProcess) {
-                processLinks();
+            if (hasRelevantChanges) {
+                debouncedProcessLinks();
             }
         });
 
@@ -120,13 +135,9 @@
             attributeFilter: ['href']
         });
 
-        window.addEventListener('yt-navigate-finish', function() {
-            setTimeout(processLinks, 50);
-        });
-
-        window.addEventListener('popstate', function() {
-            setTimeout(processLinks, 100);
-        });
+        window.addEventListener('yt-navigate-finish', debouncedProcessLinks);
+        window.addEventListener('popstate', debouncedProcessLinks);
+        window.addEventListener('yt-page-data-updated', debouncedProcessLinks);
     }
 
     if (document.readyState === 'loading') {

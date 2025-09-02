@@ -13,6 +13,53 @@
         return url;
     }
 
+    // NEW: for hamburger menu/left sidebar
+    function handleDirectShortsNavigation() {
+        if (window.location.href.includes('/shorts/')) {
+            const convertedUrl = convertShortsToWatch(window.location.href);
+            if (convertedUrl !== window.location.href) {
+                window.location.replace(convertedUrl);
+                return;
+            }
+        }
+
+        let lastUrl = window.location.href;
+
+        const checkUrlChange = () => {
+            const currentUrl = window.location.href;
+            if (currentUrl !== lastUrl) {
+                lastUrl = currentUrl;
+
+                if (currentUrl.includes('/shorts/')) {
+                    const convertedUrl = convertShortsToWatch(currentUrl);
+                    if (convertedUrl !== currentUrl) {
+                        window.location.replace(convertedUrl);
+                        return;
+                    }
+                }
+            }
+        };
+
+        const originalPushState = history.pushState;
+        history.pushState = function(state, title, url) {
+            const result = originalPushState.apply(this, arguments);
+            setTimeout(checkUrlChange, 0);
+            return result;
+        };
+
+        const originalReplaceState = history.replaceState;
+        history.replaceState = function(state, title, url) {
+            const result = originalReplaceState.apply(this, arguments);
+            setTimeout(checkUrlChange, 0);
+            return result;
+        };
+
+        window.addEventListener('yt-navigate-start', checkUrlChange);
+        window.addEventListener('yt-navigate-finish', checkUrlChange);
+        window.addEventListener('popstate', checkUrlChange);
+
+    }
+
     // must have or extension won't work
     function interceptYouTubeNavigation() {
         const originalPushState = history.pushState;
@@ -36,7 +83,7 @@
                 return;
             }
 
-            link.setAttribute('data-shorts-converted', 'true'); // mark converted links
+            link.setAttribute('data-shorts-converted', 'true');
 
             const originalHref = link.href;
             const convertedHref = convertShortsToWatch(originalHref);
@@ -45,7 +92,7 @@
                 get: function() {
                     return convertedHref;
                 },
-                set: function(value) { // YouTube may change the href dynamically
+                set: function(value) {
                     const converted = convertShortsToWatch(value);
                     this.setAttribute('href', converted);
                 },
@@ -85,25 +132,20 @@
         });
     }
 
-    // handle dynamically loaded content with enhanced interception
     function observeChanges() {
         interceptYouTubeNavigation();
         processLinks();
 
-        // Debounce function to reduce excessive processing
         let processingTimeout;
         function debouncedProcessLinks() {
             clearTimeout(processingTimeout);
             processingTimeout = setTimeout(processLinks, 100);
         }
 
-        // More targeted observer with reduced scope
         const observer = new MutationObserver(function(mutations) {
             let hasRelevantChanges = false;
 
-            // Process mutations more efficiently
             for (const mutation of mutations) {
-                // Skip irrelevant mutations early
                 if (mutation.type === 'attributes' && mutation.attributeName !== 'href') {
                     continue;
                 }
@@ -111,7 +153,6 @@
                 if (mutation.addedNodes.length > 0) {
                     for (const node of mutation.addedNodes) {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            // Quick check for shorts links without deep traversal
                             if ((node.tagName === 'A' && node.href && node.href.includes('/shorts/')) ||
                                 (node.innerHTML && node.innerHTML.includes('/shorts/'))) {
                                 hasRelevantChanges = true;
@@ -141,8 +182,12 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', observeChanges);
+        document.addEventListener('DOMContentLoaded', function() {
+            handleDirectShortsNavigation();
+            observeChanges();
+        });
     } else {
+        handleDirectShortsNavigation();
         observeChanges();
     }
 })();

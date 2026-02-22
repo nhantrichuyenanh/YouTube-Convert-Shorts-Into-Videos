@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Convert Shorts Into Videos",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "Nhân Trí",
   "homepage_url": "https://github.com/nhantrichuyenanh/YouTube-Convert-Shorts-Into-Videos",
   "description": "Converts /shorts/ into /watch?v= on YouTube.",
@@ -13,11 +13,6 @@
     "128": "icon.png",
     "256": "icon.png"
   },
-  "host_permissions": [
-    "https://www.youtube.com/@*",
-    "https://www.youtube.com/playlist?list=*",
-    "https://www.youtube.com/feed/history*"
-  ],
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
@@ -28,7 +23,8 @@
   "browser_specific_settings": {
         "gecko": {
             "id": "{dde4f5cd-a87e-42f1-bda3-f53d61c82b3f}",
-            "strict_min_version": "109.0"
+            "strict_min_version": "140.0",
+            "data_collection_permissions": {"required": ["none"]}
         }
   }
 }
